@@ -1,5 +1,4 @@
 import threading
-import subprocess
 import sys
 import os
 
@@ -14,13 +13,11 @@ except ImportError:
 class TrayIcon:
     """
     little icon that sits in your system tray so you know
-    the app is running. right-click gives you a menu to quit
-    or show a test popup.
+    the app is running. right-click gives you a menu to quit.
     """
 
-    def __init__(self, on_quit=None, on_test_popup=None):
+    def __init__(self, on_quit=None):
         self.on_quit = on_quit
-        self.on_test_popup = on_test_popup
         self._icon = None
 
     def start(self):
@@ -36,7 +33,6 @@ class TrayIcon:
         menu = pystray.Menu(
             pystray.MenuItem("Shutdown Reminder", None, enabled=False),
             pystray.Menu.SEPARATOR,
-            pystray.MenuItem("Test popup", self._handle_test),
             pystray.MenuItem("Quit", self._handle_quit),
         )
         self._icon = pystray.Icon(
@@ -69,29 +65,6 @@ class TrayIcon:
         draw.rectangle([16, 16, 48, 48], fill="#ffffff")
         draw.rectangle([28, 12, 36, 20], fill="#ffffff")
         return img
-
-    def _handle_test(self, icon, item):
-        """
-        spawn the popup in a completely separate process.
-        tkinter and threads dont mix well, this is the
-        most reliable way to do it from a tray callback.
-        """
-        if getattr(sys, "frozen", False):
-            script = os.path.join(os.path.dirname(sys.executable), "test_popup.py")
-            python = sys.executable
-        else:
-            script = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)), "test_popup.py"
-            )
-            python = sys.executable
-
-        try:
-            subprocess.Popen([python, script])
-        except Exception as e:
-            print("[tray] failed to launch test popup: {}".format(e))
-            # fallback: try the callback if one was set
-            if self.on_test_popup:
-                self.on_test_popup()
 
     def _handle_quit(self, icon, item):
         if self._icon:
