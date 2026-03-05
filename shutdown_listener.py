@@ -1,5 +1,4 @@
 import ctypes
-import time
 import subprocess
 import logging
 import threading

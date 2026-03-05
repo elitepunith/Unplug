@@ -62,7 +62,6 @@ class App:
 
         print("shutdown reminder is running")
         print("look for the icon in your system tray")
-        print("right-click tray icon -> Test popup to try it")
         print("press ctrl+c to stop\n")
 
         # start listening for shutdown (this blocks)
