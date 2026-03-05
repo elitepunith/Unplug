@@ -1,7 +1,6 @@
-# Shutdown Reminder
+# Unplug
 
-A lightweight Windows app that detects when you're shutting down your PC
-and pops up a quick checklist to make sure you didn't forget anything.
+A lightweight Windows 10/11 app that sits in your system tray and shows a reminder checklist when you shut down your PC.
 
 ## What it does
 
@@ -9,12 +8,12 @@ and pops up a quick checklist to make sure you didn't forget anything.
 - When you hit Shut Down / Restart, it intercepts the event
 - Shows a popup with your custom checklist
 - Plays a sound alert
-- You can either proceed or cancel the shutdown
+- You can either proceed with or cancel the shutdown
 - Auto-proceeds after the timeout (default 45 seconds)
 
-## Setup (from source)
+## Setup
 
-You need Python 3.8 (the last version that supports Windows 7).
+Requires Python 3.10+ and Windows 10/11.
 
 ```
 pip install -r requirements.txt
@@ -27,19 +26,43 @@ To run without the console window:
 pythonw.exe main.py
 ```
 
+## How to test
+
+**Option 1 — tray menu**
+
+Right-click the tray icon and choose **Test popup** to see the popup without actually shutting down.
+
+**Option 2 — scheduled shutdown**
+
+Open a command prompt as Administrator and run:
+
+```
+shutdown /s /t 120
+```
+
+This schedules a shutdown in 120 seconds. The app will intercept it and show the popup.
+To cancel manually if needed: `shutdown /a`
+
 ## Build standalone .exe
 
-Just run:
+Run:
 
 ```
 build.bat
 ```
 
-This creates `dist/ShutdownReminder.exe` — a single file, no Python needed.
+This installs dependencies, packages everything with PyInstaller, and creates `dist\Unplug.exe` — a single file, no Python needed.
+
+## Auto-start on boot
+
+1. Press Win+R, type `shell:startup`, hit Enter
+2. Create a shortcut to `Unplug.exe` (or `pythonw.exe main.py`)
+3. Drop it in that folder
+4. Done — it'll start every time you log in
 
 ## Configuration
 
-Edit `settings.json` to change your reminders, timeout, sound, etc.
+Edit `settings.json` to customise your reminders, timeout, and sound:
 
 ```json
 {
@@ -55,36 +78,9 @@ Edit `settings.json` to change your reminders, timeout, sound, etc.
 }
 ```
 
-## Auto-start on boot
-
-1. Press Win+R, type `shell:startup`, hit Enter
-2. Create a shortcut to `ShutdownReminder.exe` (or `pythonw.exe main.py`)
-3. Drop it in that folder
-4. Done — it'll start every time you log in
-
-## System tray
-
-Right-click the tray icon for:
-- **Test popup** — see what it looks like without actually shutting down
-- **Quit** — stop the app
-
-## How to test without actually shutting down
-
-Option 1 — use the tray menu "Test popup"
-
-Option 2 — open cmd as Administrator and run:
-```
-shutdown /s /t 60
-```
-This schedules a shutdown in 60 seconds. The app will intercept it.
-To cancel manually if needed: `shutdown /a`
-
 ## Troubleshooting
 
-Check `shutdown_reminder.log` for errors.
-
-Common issues:
-- **No popup on shutdown**: Make sure the app is actually running (check tray)
-- **pywin32 import error**: Run `pip install pywin32` and then `python Scripts/pywin32_postinstall.py -install`
-- **No tray icon**: Install pystray and Pillow: `pip install pystray Pillow`
-- **No sound**: Make sure `alert.wav` exists next to the app, or set `play_sound` to false
+- **No popup on shutdown**: Make sure the app is running (check the system tray icon)
+- **pywin32 import error**: Run `pip install pywin32` then `python Scripts/pywin32_postinstall.py -install`
+- **No tray icon**: Run `pip install pystray Pillow`
+- **No sound**: Make sure `alert.wav` exists next to the app and is not 0 bytes, or set `play_sound` to `false`

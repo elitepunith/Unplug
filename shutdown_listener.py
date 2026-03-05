@@ -1,6 +1,8 @@
+import ctypes
 import time
 import subprocess
 import logging
+import threading
 
 try:
     import win32gui
@@ -10,37 +12,27 @@ try:
 except ImportError:
     HAS_WIN32 = False
 
-
+user32 = ctypes.windll.user32 if HAS_WIN32 else None
 logger = logging.getLogger("shutdown_reminder")
 
 
 class ShutdownListener:
     """
     creates a hidden window that receives windows messages.
-    when windows sends WM_QUERYENDSESSION (meaning "hey im about
-    to shut down, you cool with that?"), we intercept it,
-    show the popup, and either allow or block it.
-
-    this is the standard win32 way to do it and it works
-    on windows 7 just fine.
+    when windows sends WM_QUERYENDSESSION we block it temporarily,
+    show the popup in a separate thread, then either re-initiate
+    shutdown or cancel it based on user choice.
     """
 
     def __init__(self, on_shutdown_detected):
-        """
-        on_shutdown_detected: callable that returns True to allow
-                              shutdown, False to block it
-        """
         if not HAS_WIN32:
-            raise RuntimeError(
-                "pywin32 is required. run: pip install pywin32"
-            )
-
+            raise RuntimeError("pywin32 is required. run: pip install pywin32")
         self.on_shutdown_detected = on_shutdown_detected
         self._hwnd = None
         self._class_atom = None
+        self._shutdown_pending = False
 
     def start(self):
-        """register the hidden window and start pumping messages"""
         logger.info("registering shutdown listener window")
 
         wc = win32gui.WNDCLASS()
@@ -52,11 +44,7 @@ class ShutdownListener:
         self._hwnd = win32gui.CreateWindow(
             self._class_atom,
             "ShutdownReminderHidden",
-            0,      # style (invisible)
-            0, 0,   # position
-            0, 0,   # size
-            0,      # parent
-            0,      # menu
+            0, 0, 0, 0, 0, 0, 0,
             wc.hInstance,
             None,
         )
@@ -67,19 +55,23 @@ class ShutdownListener:
     def _wnd_proc(self, hwnd, msg, wparam, lparam):
         if msg == win32con.WM_QUERYENDSESSION:
             logger.info("WM_QUERYENDSESSION received")
-            try:
-                allow = self.on_shutdown_detected()
-            except Exception as e:
-                logger.error("popup callback failed: {}".format(e))
-                allow = True  # dont trap the user if we crash
 
-            if allow:
-                logger.info("user said proceed, allowing shutdown")
-                return True
-            else:
-                logger.info("user said cancel, blocking shutdown")
-                self._cancel_shutdown()
-                return False
+            # tell windows we need more time to show a dialog
+            try:
+                user32.ShutdownBlockReasonCreate(
+                    hwnd, "Checking your reminder list..."
+                )
+            except Exception as e:
+                logger.warning("ShutdownBlockReasonCreate failed: {}".format(e))
+
+            # show popup in a background thread so we return immediately
+            if not self._shutdown_pending:
+                self._shutdown_pending = True
+                t = threading.Thread(target=self._show_popup_and_decide, daemon=True)
+                t.start()
+
+            # return False to block shutdown while we show the popup
+            return False
 
         if msg == win32con.WM_ENDSESSION:
             logger.info("WM_ENDSESSION received, shutdown is happening")
@@ -91,11 +83,32 @@ class ShutdownListener:
 
         return win32gui.DefWindowProc(hwnd, msg, wparam, lparam)
 
+    def _show_popup_and_decide(self):
+        try:
+            allow = self.on_shutdown_detected()
+        except Exception as e:
+            logger.error("popup callback failed: {}".format(e))
+            allow = True
+
+        # clean up the block reason
+        try:
+            user32.ShutdownBlockReasonDestroy(self._hwnd)
+        except Exception:
+            pass
+
+        self._shutdown_pending = False
+
+        if allow:
+            logger.info("user said proceed, re-initiating shutdown")
+            try:
+                subprocess.Popen(["shutdown", "/s", "/t", "0"])
+            except Exception as e:
+                logger.error("failed to re-initiate shutdown: {}".format(e))
+        else:
+            logger.info("user said cancel, blocking shutdown")
+            self._cancel_shutdown()
+
     def _pump_messages(self):
-        """
-        message loop. this is blocking. win32gui.PumpMessages() would also
-        work but this gives us a chance to handle KeyboardInterrupt.
-        """
         logger.info("message pump started")
         try:
             while True:
@@ -106,7 +119,6 @@ class ShutdownListener:
             self.stop()
 
     def _cancel_shutdown(self):
-        """try to abort a pending shutdown"""
         try:
             result = subprocess.run(
                 ["shutdown", "/a"],
@@ -116,13 +128,11 @@ class ShutdownListener:
             if result.returncode == 0:
                 logger.info("shutdown cancelled successfully")
             else:
-                logger.warning(
-                    "shutdown /a returned code {}".format(result.returncode)
-                )
+                logger.warning("shutdown /a returned code {}".format(result.returncode))
         except subprocess.TimeoutExpired:
             logger.warning("shutdown /a timed out")
         except FileNotFoundError:
-            logger.error("shutdown command not found (weird)")
+            logger.error("shutdown command not found")
         except Exception as e:
             logger.error("failed to cancel shutdown: {}".format(e))
 
