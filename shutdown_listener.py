@@ -112,7 +112,6 @@ class ShutdownListener:
         try:
             while True:
                 win32gui.PumpWaitingMessages()
-                time.sleep(0.1)
         except KeyboardInterrupt:
             logger.info("stopped by ctrl+c")
             self.stop()
