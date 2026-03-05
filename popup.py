@@ -6,7 +6,6 @@ class ReminderPopup:
     """
     the main popup that shows up when shutdown is detected.
     shows a checklist of reminders, a countdown, and two buttons.
-    user can either acknowledge and let shutdown happen, or cancel it.
     """
 
     def __init__(self, reminders, timeout=45):
@@ -17,10 +16,6 @@ class ReminderPopup:
         self._done = threading.Event()
 
     def show(self):
-        """
-        blocks until user makes a choice or timer runs out.
-        returns "proceed" or "cancel".
-        """
         try:
             self._build_window()
             self.root.mainloop()
@@ -31,7 +26,7 @@ class ReminderPopup:
 
     def _build_window(self):
         self.root = tk.Tk()
-        self.root.withdraw()  # hide first, show after building
+        self.root.withdraw()
 
         self.root.title("Shutdown Reminder")
         self.root.geometry("480x420")
@@ -40,7 +35,7 @@ class ReminderPopup:
         self.root.resizable(False, False)
         self.root.protocol("WM_DELETE_WINDOW", self._on_proceed)
 
-        # center it on screen
+        # center on screen
         self.root.update_idletasks()
         sw = self.root.winfo_screenwidth()
         sh = self.root.winfo_screenheight()
@@ -53,19 +48,21 @@ class ReminderPopup:
         banner.pack(fill="x")
         banner.pack_propagate(False)
 
-        tk.Label(
+        lbl_title = tk.Label(
             banner,
             text="SHUTDOWN DETECTED",
             font=("Segoe UI", 15, "bold"),
             bg="#db4b4b", fg="white",
-        ).pack(pady=(10, 0))
+        )
+        lbl_title.pack(pady=10)
 
-        tk.Label(
+        lbl_sub = tk.Label(
             banner,
             text="check these before you go:",
             font=("Segoe UI", 9),
             bg="#db4b4b", fg="#ffc0c0",
-        ).pack()
+        )
+        lbl_sub.pack()
 
         # -- checklist area --
         checklist_area = tk.Frame(self.root, bg="#1a1b26", padx=25, pady=12)
@@ -89,7 +86,7 @@ class ReminderPopup:
             )
             cb.pack(fill="x", pady=3)
 
-        # -- timer --
+        # -- timer label --
         self.timer_label = tk.Label(
             self.root,
             text="auto-proceeding in {}s".format(self.remaining),
@@ -103,11 +100,11 @@ class ReminderPopup:
             self.root, height=4, bg="#1a1b26",
             highlightthickness=0,
         )
-        self.progress_canvas.pack(fill="x", padx=25, pady=(4, 8))
+        self.progress_canvas.pack(fill="x", padx=25, pady=8)
 
-        # -- buttons --
-        btn_area = tk.Frame(self.root, bg="#1a1b26", padx=25, pady=(0, 15))
-        btn_area.pack(fill="x")
+        # -- buttons area --
+        btn_area = tk.Frame(self.root, bg="#1a1b26", padx=25)
+        btn_area.pack(fill="x", pady=15)
 
         self.proceed_btn = tk.Button(
             btn_area,
@@ -118,7 +115,7 @@ class ReminderPopup:
             relief="flat", cursor="hand2",
             command=self._on_proceed,
         )
-        self.proceed_btn.pack(fill="x", ipady=5, pady=(0, 6))
+        self.proceed_btn.pack(fill="x", ipady=5, pady=3)
 
         self.cancel_btn = tk.Button(
             btn_area,
@@ -129,9 +126,9 @@ class ReminderPopup:
             relief="flat", cursor="hand2",
             command=self._on_cancel,
         )
-        self.cancel_btn.pack(fill="x", ipady=3)
+        self.cancel_btn.pack(fill="x", ipady=3, pady=3)
 
-        # now show the window and force it to the front
+        # show and force focus
         self.root.deiconify()
         self.root.lift()
         self.root.focus_force()
@@ -141,7 +138,6 @@ class ReminderPopup:
         self._tick()
 
     def _force_focus(self):
-        """hit it again after 100ms to really make sure its on top"""
         try:
             self.root.lift()
             self.root.attributes("-topmost", True)
@@ -159,7 +155,6 @@ class ReminderPopup:
                 text="auto-proceeding in {}s".format(self.remaining)
             )
 
-            # update progress bar
             self.progress_canvas.delete("all")
             w = self.progress_canvas.winfo_width()
             if w > 1:
@@ -173,7 +168,6 @@ class ReminderPopup:
             self.remaining -= 1
             self.root.after(1000, self._tick)
         except Exception:
-            # window got destroyed mid-tick, thats fine
             pass
 
     def _on_check_changed(self):

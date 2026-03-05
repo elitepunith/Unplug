@@ -19,3 +19,12 @@
 2026-03-05 19:17:33 INFO registering shutdown listener window
 2026-03-05 19:17:33 INFO hidden window created (hwnd=3082406)
 2026-03-05 19:17:33 INFO message pump started
+2026-03-05 19:30:11 INFO ==================================================
+2026-03-05 19:30:11 INFO shutdown reminder started at 2026-03-05 19:30:11
+2026-03-05 19:30:11 INFO python 3.14.2 (tags/v3.14.2:df79316, Dec  5 2025, 17:18:21) [MSC v.1944 64 bit (AMD64)] on win32
+2026-03-05 19:30:11 INFO ==================================================
+2026-03-05 19:30:11 INFO tray icon started
+2026-03-05 19:30:11 INFO registering shutdown listener window
+2026-03-05 19:30:11 INFO hidden window created (hwnd=11798270)
+2026-03-05 19:30:11 INFO message pump started
+2026-03-05 19:30:56 INFO WM_QUERYENDSESSION received
