@@ -14,7 +14,7 @@ set EXTRA_DATA=
 if exist icon.png set EXTRA_DATA=%EXTRA_DATA% --add-data "icon.png;."
 if exist alert.wav set EXTRA_DATA=%EXTRA_DATA% --add-data "alert.wav;."
 
-pyinstaller --onefile --windowed --name Unplug ^
+py -m PyInstaller --onefile --windowed --name Unplug ^
     --add-data "settings.json;." ^
     %EXTRA_DATA% ^
     main.py
