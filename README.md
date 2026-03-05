@@ -1,75 +1,45 @@
 # Unplug
 
-A lightweight Windows 10/11 app that sits in your system tray and shows a reminder checklist when you shut down your PC.
+A tiny Windows app that reminds you to check things off before your PC shuts down.
 
-## What it does
+Ever hit "Shut Down" and then realized you forgot to save something, push your code, or close those 47 browser tabs? Yeah, me too. That's why I made this.
 
-- Sits quietly in your system tray
-- When you hit Shut Down / Restart, it intercepts the event
-- Shows a popup with your custom checklist
-- Plays a sound alert
-- You can either proceed with or cancel the shutdown
-- Auto-proceeds after the timeout (default 45 seconds)
+## How it works
 
-## Setup
+1. Runs quietly in your system tray
+2. When you shut down or restart, it intercepts the event
+3. Shows a popup with your personal checklist
+4. You either confirm shutdown or cancel it
+5. If you ignore it, it auto-proceeds after 45 seconds
 
-Requires Python 3.10+ and Windows 10/11.
+That's it. Nothing fancy, nothing bloated.
+
+## Getting started
+
+You need Python 3.10+ on Windows 10 or 11.
 
 ```
 pip install -r requirements.txt
 python main.py
 ```
 
-To run without the console window:
+To run without the black console window popping up:
 
 ```
 pythonw.exe main.py
 ```
 
-## How to test
+## Make it your own
 
-**Option 1 — tray menu**
-
-Right-click the tray icon and choose **Test popup** to see the popup without actually shutting down.
-
-**Option 2 — scheduled shutdown**
-
-Open a command prompt as Administrator and run:
-
-```
-shutdown /s /t 120
-```
-
-This schedules a shutdown in 120 seconds. The app will intercept it and show the popup.
-To cancel manually if needed: `shutdown /a`
-
-## Build standalone .exe
-
-Run:
-
-```
-build.bat
-```
-
-This installs dependencies, packages everything with PyInstaller, and creates `dist\Unplug.exe` — a single file, no Python needed.
-
-## Auto-start on boot
-
-1. Press Win+R, type `shell:startup`, hit Enter
-2. Create a shortcut to `Unplug.exe` (or `pythonw.exe main.py`)
-3. Drop it in that folder
-4. Done — it'll start every time you log in
-
-## Configuration
-
-Edit `settings.json` to customise your reminders, timeout, and sound:
+Edit `settings.json`:
 
 ```json
 {
     "reminders": [
         "Save all open files",
         "Push your git commits",
-        "Close browser tabs you need later"
+        "Close browser tabs you need later",
+        "Update your work log"
     ],
     "timeout_seconds": 45,
     "play_sound": true,
@@ -78,9 +48,29 @@ Edit `settings.json` to customise your reminders, timeout, and sound:
 }
 ```
 
-## Troubleshooting
+Add whatever reminders matter to you. Change the timeout. Turn off the sound if it annoys you.
 
-- **No popup on shutdown**: Make sure the app is running (check the system tray icon)
-- **pywin32 import error**: Run `pip install pywin32` then `python Scripts/pywin32_postinstall.py -install`
-- **No tray icon**: Run `pip install pystray Pillow`
-- **No sound**: Make sure `alert.wav` exists next to the app and is not 0 bytes, or set `play_sound` to `false`
+## Building a standalone .exe
+
+```
+build.bat
+```
+
+This packages everything into a single `dist\Unplug.exe` file using PyInstaller. No Python installation needed to run it.
+
+## Auto-start on login
+
+1. Press `Win+R`, type `shell:startup`, hit Enter
+2. Drop a shortcut to `Unplug.exe` in there
+3. Done — starts every time you log in
+
+## If something isn't working
+
+- **No popup when you shut down** — make sure the app is actually running (check your system tray)
+- **pywin32 errors** — run `pip install pywin32` then `python Scripts/pywin32_postinstall.py -install`
+- **No tray icon** — `pip install pystray Pillow`
+- **No sound** — check that `alert.wav` exists and isn't empty, or set `play_sound` to `false`
+
+## License
+
+Do whatever you want with it.

@@ -2,8 +2,7 @@ import json
 import os
 import sys
 
-
-DEFAULT_SETTINGS = {
+DEFAULTS = {
     "reminders": ["Save all open files"],
     "timeout_seconds": 45,
     "play_sound": True,
@@ -13,7 +12,7 @@ DEFAULT_SETTINGS = {
 
 
 def get_base_dir():
-    """figure out where our files live, works both in dev and pyinstaller bundle"""
+    # pyinstaller changes where files live
     if getattr(sys, "frozen", False):
         return os.path.dirname(sys.executable)
     return os.path.dirname(os.path.abspath(__file__))
@@ -24,16 +23,15 @@ def load_settings():
     try:
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
-        # merge with defaults so missing keys dont blow up
-        merged = dict(DEFAULT_SETTINGS)
+        merged = dict(DEFAULTS)
         merged.update(data)
         return merged
     except FileNotFoundError:
-        print("[config] settings.json not found, using defaults")
-        return dict(DEFAULT_SETTINGS)
+        print("[config] no settings.json found, going with defaults")
+        return dict(DEFAULTS)
     except json.JSONDecodeError as e:
-        print("[config] broken json in settings.json: {}".format(e))
-        return dict(DEFAULT_SETTINGS)
+        print("[config] settings.json is broken: %s" % e)
+        return dict(DEFAULTS)
     except Exception as e:
-        print("[config] unexpected error loading settings: {}".format(e))
-        return dict(DEFAULT_SETTINGS)
+        print("[config] weird error: %s" % e)
+        return dict(DEFAULTS)

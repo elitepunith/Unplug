@@ -1,7 +1,7 @@
 import os
 import sys
 
-# winsound is stdlib on windows, no pip install needed
+# winsound comes with windows python, no install needed
 try:
     import winsound
     HAS_WINSOUND = True
@@ -10,11 +10,7 @@ except ImportError:
 
 
 def play_alert(sound_file="alert.wav"):
-    """
-    play the alert sound. if the wav file exists, use it.
-    otherwise fall back to the default windows beep.
-    nothing fancy, just needs to grab attention.
-    """
+    """plays a sound to grab attention. falls back to a beep if the wav is missing."""
     if not HAS_WINSOUND:
         return
 
@@ -29,8 +25,6 @@ def play_alert(sound_file="alert.wav"):
         if os.path.isfile(full_path) and os.path.getsize(full_path) > 0:
             winsound.PlaySound(full_path, winsound.SND_FILENAME | winsound.SND_ASYNC)
         else:
-            # three quick beeps if no wav file found
             winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
     except Exception:
-        # if sound fails, oh well, not the end of the world
-        pass
+        pass  # not worth crashing over

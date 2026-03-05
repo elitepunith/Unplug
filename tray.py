@@ -11,10 +11,7 @@ except ImportError:
 
 
 class TrayIcon:
-    """
-    little icon that sits in your system tray so you know
-    the app is running. right-click gives you a menu to quit.
-    """
+    """system tray icon — just shows the app is alive, and lets you quit."""
 
     def __init__(self, on_quit=None):
         self.on_quit = on_quit
@@ -22,25 +19,18 @@ class TrayIcon:
 
     def start(self):
         if not HAS_TRAY:
-            print("[tray] pystray or Pillow not installed, skipping tray icon")
+            print("[tray] pystray/Pillow missing, no tray icon for you")
             return
-
-        t = threading.Thread(target=self._run, daemon=True)
-        t.start()
+        threading.Thread(target=self._run, daemon=True).start()
 
     def _run(self):
-        image = self._load_icon()
+        img = self._load_icon()
         menu = pystray.Menu(
-            pystray.MenuItem("Shutdown Reminder", None, enabled=False),
+            pystray.MenuItem("Unplug", None, enabled=False),
             pystray.Menu.SEPARATOR,
-            pystray.MenuItem("Quit", self._handle_quit),
+            pystray.MenuItem("Quit", self._on_quit),
         )
-        self._icon = pystray.Icon(
-            "shutdown_reminder",
-            image,
-            "Shutdown Reminder - Running",
-            menu,
-        )
+        self._icon = pystray.Icon("unplug", img, "Unplug — Running", menu)
         self._icon.run()
 
     def _load_icon(self):
@@ -50,23 +40,21 @@ class TrayIcon:
             base = os.path.dirname(os.path.abspath(__file__))
 
         icon_path = os.path.join(base, "icon.png")
-
         try:
             if os.path.isfile(icon_path):
                 img = Image.open(icon_path)
-                img = img.resize((64, 64))
-                return img
+                return img.resize((64, 64))
         except Exception:
             pass
 
-        # fallback: make a simple bell-ish icon
+        # fallback — quick and dirty placeholder
         img = Image.new("RGB", (64, 64), "#db4b4b")
-        draw = ImageDraw.Draw(img)
-        draw.rectangle([16, 16, 48, 48], fill="#ffffff")
-        draw.rectangle([28, 12, 36, 20], fill="#ffffff")
+        d = ImageDraw.Draw(img)
+        d.rectangle([16, 16, 48, 48], fill="#ffffff")
+        d.rectangle([28, 12, 36, 20], fill="#ffffff")
         return img
 
-    def _handle_quit(self, icon, item):
+    def _on_quit(self, icon, item):
         if self._icon:
             self._icon.stop()
         if self.on_quit:
