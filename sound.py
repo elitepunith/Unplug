@@ -26,7 +26,7 @@ def play_alert(sound_file="alert.wav"):
     full_path = os.path.join(base, sound_file)
 
     try:
-        if os.path.isfile(full_path):
+        if os.path.isfile(full_path) and os.path.getsize(full_path) > 0:
             winsound.PlaySound(full_path, winsound.SND_FILENAME | winsound.SND_ASYNC)
         else:
             # three quick beeps if no wav file found

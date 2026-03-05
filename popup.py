@@ -29,7 +29,7 @@ class ReminderPopup:
         self.root.withdraw()
 
         self.root.title("Shutdown Reminder")
-        self.root.geometry("480x420")
+        self.root.geometry("480x450")
         self.root.configure(bg="#1a1b26")
         self.root.attributes("-topmost", True)
         self.root.resizable(False, False)
@@ -40,11 +40,11 @@ class ReminderPopup:
         sw = self.root.winfo_screenwidth()
         sh = self.root.winfo_screenheight()
         x = (sw - 480) // 2
-        y = (sh - 420) // 2
-        self.root.geometry("480x420+{}+{}".format(x, y))
+        y = (sh - 450) // 2
+        self.root.geometry("480x450+{}+{}".format(x, y))
 
         # -- top banner --
-        banner = tk.Frame(self.root, bg="#db4b4b", height=60)
+        banner = tk.Frame(self.root, bg="#db4b4b", height=80)
         banner.pack(fill="x")
         banner.pack_propagate(False)
 

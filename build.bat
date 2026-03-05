@@ -1,22 +1,25 @@
 @echo off
 echo ====================================
-echo  Building Shutdown Reminder
+echo  Building Unplug
 echo ====================================
 echo.
 
-pip install -r requirements.txt
-pip install pyinstaller
+py -m pip install -r requirements.txt
+py -m pip install pyinstaller
 
 echo.
 echo packaging...
-pyinstaller --onefile --windowed --name ShutdownReminder ^
+
+set EXTRA_DATA=
+if exist icon.png set EXTRA_DATA=%EXTRA_DATA% --add-data "icon.png;."
+if exist alert.wav set EXTRA_DATA=%EXTRA_DATA% --add-data "alert.wav;."
+
+pyinstaller --onefile --windowed --name Unplug ^
     --add-data "settings.json;." ^
-    --add-data "alert.wav;." ^
-    --add-data "icon.png;." ^
-    --icon=icon.png ^
+    %EXTRA_DATA% ^
     main.py
 
 echo.
-echo done! check the dist/ folder for ShutdownReminder.exe
+echo done! check the dist\ folder for Unplug.exe
 echo ====================================
 pause
