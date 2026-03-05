@@ -1,0 +1,12 @@
+{
+    "reminders": [
+        "Save all open files",
+        "Push your git commits",
+        "Close browser tabs you need later",
+        "Update your work log"
+    ],
+    "timeout_seconds": 45,
+    "play_sound": true,
+    "sound_file": "alert.wav",
+    "log_file": "shutdown_reminder.log"
+}
