@@ -1,6 +1,6 @@
-using System.Windows;
+﻿using System.Windows;
 
-namespace UnplugReminder
+namespace Unplug
 {
     public partial class App : Application
     {
