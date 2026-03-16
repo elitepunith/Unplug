@@ -1,72 +1,109 @@
-// Grab our DOM elements
-const timerDisplay = document.getElementById('timer-display');
-const btnUnplug = document.getElementById('btn-unplug');
-const statusText = document.getElementById('status-text');
-const wrapper = document.querySelector('.terminal-container');
-const warningText = document.getElementById('glitch-warning');
+// Grab DOM elements
+const setupSection = document.getElementById('setup-section');
+const focusSection = document.getElementById('focus-section');
+const taskInput = document.getElementById('task-input');
+const startBtn = document.getElementById('start-btn');
+const resumeBtn = document.getElementById('resume-btn');
+const endBtn = document.getElementById('end-btn');
 
-// State variables
-let timerInterval = null;
-let secondsActive = 0;
+const timerDisplay = document.getElementById('timer-display');
+const taskDisplay = document.querySelector('#current-task span');
+const interruptionDisplay = document.getElementById('interruption-count');
+const statusMessage = document.getElementById('status-message');
+
+// App state
+let timerInterval;
+let seconds = 0;
+let interruptions = 0;
 let isRunning = false;
 
-// Format the time so it looks like 00:00 instead of just a raw number
-function updateDisplay() {
-    const m = Math.floor(secondsActive / 60).toString().padStart(2, '0');
-    const s = (secondsActive % 60).toString().padStart(2, '0');
-    timerDisplay.innerText = `${m}:${s}`;
+// format time into mm:ss
+function formatTime(totalSeconds) {
+    const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+    const s = (totalSeconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
 }
 
-// Kick off the timer
-function startTerminal() {
-    if (isRunning) return; 
+// update the visual timer
+function tick() {
+    seconds++;
+    timerDisplay.innerText = formatTime(seconds);
+}
+
+// Start the focus session
+function startSession() {
+    // don't start if they didn't type anything
+    if (taskInput.value.trim() === "") {
+        alert("Enter a task first.");
+        return;
+    }
+
+    // swap UI
+    setupSection.classList.add('hidden');
+    focusSection.classList.remove('hidden');
+    taskDisplay.innerText = taskInput.value;
     
+    // kick off the timer
     isRunning = true;
-    statusText.innerText = "LINK ESTABLISHED. DO NOT LOOK AWAY.";
-    btnUnplug.classList.add('hidden'); // hide button while running
-    warningText.classList.add('hidden');
-    
-    // Reset any previous glitch effects just in case
-    wrapper.classList.remove('shatter');
-    
-    timerInterval = setInterval(() => {
-        secondsActive++;
-        updateDisplay();
-    }, 1000);
+    timerInterval = setInterval(tick, 1000);
 }
 
-// Nuke it. They left the tab.
-function triggerGlitch() {
+// Pause session (used when they tab out)
+function pauseSession() {
     clearInterval(timerInterval);
     isRunning = false;
-    secondsActive = 0; // zero out their progress lol
-    updateDisplay();
     
-    // update the UI to look broken
-    statusText.innerText = "SYSTEM FAILURE.";
-    wrapper.classList.add('shatter');
-    warningText.classList.remove('hidden');
-    
-    // bring the button back so they can try again
-    setTimeout(() => {
-        btnUnplug.innerText = "REBOOT SYSTEM";
-        btnUnplug.classList.remove('hidden');
-    }, 1000);
+    // show the resume button and warning
+    statusMessage.classList.remove('hidden');
+    resumeBtn.classList.remove('hidden');
 }
 
-// --- EVENT LISTENERS ---
+// Resume after being distracted
+function resumeSession() {
+    statusMessage.classList.add('hidden');
+    resumeBtn.classList.add('hidden');
+    
+    isRunning = true;
+    timerInterval = setInterval(tick, 1000);
+}
 
-// Button click
-btnUnplug.addEventListener('click', () => {
-    startTerminal();
+// End the whole thing and reset
+function endSession() {
+    clearInterval(timerInterval);
+    
+    // reset state
+    seconds = 0;
+    interruptions = 0;
+    isRunning = false;
+    taskInput.value = "";
+    timerDisplay.innerText = "00:00";
+    interruptionDisplay.innerText = "0";
+    
+    // reset UI visibility
+    statusMessage.classList.add('hidden');
+    resumeBtn.classList.add('hidden');
+    focusSection.classList.add('hidden');
+    setupSection.classList.remove('hidden');
+}
+
+
+// --- Events ---
+
+startBtn.addEventListener('click', startSession);
+resumeBtn.addEventListener('click', resumeSession);
+endBtn.addEventListener('click', endSession);
+
+// allow hitting Enter to start
+taskInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') startSession();
 });
 
-// The core mechanic: checking if they switch tabs
-// Using the visibility API because it's super reliable for this
+// The snitch: check if they leave the tab
 document.addEventListener('visibilitychange', () => {
-    // If the timer is actually running and the tab becomes hidden...
+    // only punish them if the timer is actively running
     if (isRunning && document.visibilityState === 'hidden') {
-        console.log("User lost focus, triggering penalty.");
-        triggerGlitch();
+        interruptions++;
+        interruptionDisplay.innerText = interruptions;
+        pauseSession();
     }
 });

@@ -3,19 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UNPLUG // Terminal</title>
+    <title>Unplug | Deep Work</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-    <main id="app-wrapper">
-        <div class="terminal-container">
-            <h1 id="status-text">SYSTEM READY.</h1>
+    <main class="container">
+        <div id="setup-section">
+            <input type="text" id="task-input" placeholder="What are you focusing on?" autocomplete="off">
+            <button id="start-btn">Lock In</button>
+        </div>
+
+        <div id="focus-section" class="hidden">
+            <p id="current-task">Focusing on: <span>...</span></p>
             <div id="timer-display">00:00</div>
             
-            <button id="btn-unplug">INITIALIZE UNPLUG</button>
-            
-            <p id="glitch-warning" class="hidden">CONNECTION SEVERED. FOCUS LOST.</p>
+            <div class="stats">
+                <p>Interruptions: <span id="interruption-count">0</span></p>
+            </div>
+
+            <p id="status-message" class="hidden">Session paused. You left the tab.</p>
+            <button id="resume-btn" class="hidden">Resume</button>
+            <button id="end-btn">End Session</button>
         </div>
     </main>
 
