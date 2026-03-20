@@ -1,97 +1,138 @@
-/* keeping it minimal and brutalist */
+/* unplug - focus timer  */
+/* started this around 11pm, apologies for some of the mess below */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+
 :root {
-    --bg-dark: #121212;
-    --text-main: #e0e0e0;
-    --text-muted: #757575;
-    --accent: #ffffff;
-    --font-mono: 'Courier New', Courier, monospace;
+    --bg: #0f0f0f;
+    --fg: #dedede;
+    --dim: #555;
+    --red: #e05252;
+    /* tried #ff5252 but it felt too bright */
+}
+
+* {
+    box-sizing: border-box;
 }
 
 body {
     margin: 0;
-    padding: 0;
-    background-color: var(--bg-dark);
-    color: var(--text-main);
-    font-family: var(--font-mono);
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Space Mono', monospace;
+    min-height: 100vh;
     display: flex;
-    justify-content: center;
     align-items: center;
-    height: 100vh;
+    justify-content: center;
 }
 
 .container {
+    width: 460px;
+    max-width: 90%;
     text-align: center;
-    width: 100%;
-    max-width: 500px;
-    padding: 20px;
+    padding: 40px 20px;
 }
 
-/* inputs and buttons */
-input[type="text"] {
-    width: 80%;
-    padding: 15px;
-    background: transparent;
-    border: 1px solid var(--text-muted);
-    color: var(--text-main);
-    font-family: inherit;
+.app-title {
     font-size: 1.1rem;
-    text-align: center;
-    margin-bottom: 20px;
-    outline: none;
+    font-weight: 400;
+    color: var(--dim);
+    letter-spacing: 4px;
+    margin: 0 0 40px 0;
+    text-transform: lowercase;
 }
+
+input[type="text"] {
+    display: block;
+    width: 100%;
+    padding: 14px 10px;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--dim);
+    color: var(--fg);
+    font-family: inherit;
+    font-size: 1rem;
+    text-align: center;
+    outline: none;
+    margin-bottom: 28px;
+    transition: border-color 0.15s;
+}
+
+input::placeholder { color: var(--dim); }
 
 input[type="text"]:focus {
-    border-color: var(--accent);
+    border-bottom-color: var(--fg);
 }
 
 button {
-    background: var(--text-main);
-    color: var(--bg-dark);
-    border: none;
-    padding: 12px 30px;
+    background: none;
+    color: var(--fg);
+    border: 1px solid var(--dim);
+    padding: 10px 26px;
     font-family: inherit;
-    font-weight: bold;
-    font-size: 1rem;
+    font-size: 0.85rem;
     cursor: pointer;
-    transition: opacity 0.2s;
-    margin: 5px;
+    letter-spacing: 1px;
+    transition: background 0.1s, color 0.1s;
+    margin: 4px;
 }
 
 button:hover {
-    opacity: 0.8;
+    background: var(--fg);
+    color: var(--bg);
+    /* tried box-shadow here, looked bad */
 }
 
-/* timer stuff */
+#start-btn {
+    background: var(--fg);
+    color: var(--bg);
+    border-color: var(--fg);
+}
+
+#start-btn:hover {
+    opacity: 0.85;
+    background: var(--fg);
+    color: var(--bg);
+}
+
 #timer-display {
-    font-size: 5rem;
-    margin: 30px 0;
-    font-weight: normal;
-    letter-spacing: -2px;
+    font-size: 5.5rem;
+    font-weight: 700;
+    letter-spacing: -4px;
+    margin: 20px 0 16px;
+    line-height: 1;
 }
 
 #current-task {
-    color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: 0.78rem;
+    color: var(--dim);
+    letter-spacing: 2px;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    margin-bottom: 6px;
+    min-height: 1.2em;
 }
 
-#current-task span {
-    color: var(--text-main);
-    font-weight: bold;
-}
-
-.stats {
-    margin-bottom: 20px;
-    color: var(--text-muted);
+.stats-row {
+    color: var(--dim);
+    font-size: 0.8rem;
+    margin-bottom: 28px;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
 }
 
 #status-message {
-    color: #ff5252; /* subtle red just for warnings */
-    margin-bottom: 15px;
+    color: var(--red);
+    font-size: 0.82rem;
+    margin-bottom: 14px;
+    letter-spacing: 0.5px;
 }
 
-/* utility */
-.hidden {
-    display: none !important;
+.btn-group {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
 }
+
+.hidden { display: none !important; }

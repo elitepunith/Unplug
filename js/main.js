@@ -1,109 +1,110 @@
-// Grab DOM elements
-const setupSection = document.getElementById('setup-section');
-const focusSection = document.getElementById('focus-section');
-const taskInput = document.getElementById('task-input');
-const startBtn = document.getElementById('start-btn');
-const resumeBtn = document.getElementById('resume-btn');
-const endBtn = document.getElementById('end-btn');
+// main.js
+// handles all the timer + tab detection stuff
+// wrote this in a few sittings so it might be a little inconsistent
 
-const timerDisplay = document.getElementById('timer-display');
-const taskDisplay = document.querySelector('#current-task span');
-const interruptionDisplay = document.getElementById('interruption-count');
-const statusMessage = document.getElementById('status-message');
+var taskInput    = document.getElementById('task-input');
+var startBtn     = document.getElementById('start-btn');
+var resumeBtn    = document.getElementById('resume-btn');
+var endBtn       = document.getElementById('end-btn');
+var timerEl      = document.getElementById('timer-display');
+var taskLabel    = document.getElementById('task-label');
+var countEl      = document.getElementById('interruption-count');
+var statusMsg    = document.getElementById('status-message');
+var setupDiv     = document.getElementById('setup-section');
+var focusDiv     = document.getElementById('focus-section');
 
-// App state
-let timerInterval;
-let seconds = 0;
-let interruptions = 0;
-let isRunning = false;
+// state
+let secs = 0;
+let lapses = 0;      // "interruptions" felt too judgmental in variable form lol
+let ticker = null;
+let running = false;
 
-// format time into mm:ss
-function formatTime(totalSeconds) {
-    const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
-    const s = (totalSeconds % 60).toString().padStart(2, '0');
-    return `${m}:${s}`;
+function pad(n) {
+    return String(n).padStart(2, '0');
 }
 
-// update the visual timer
-function tick() {
-    seconds++;
-    timerDisplay.innerText = formatTime(seconds);
+function showTime() {
+    let m = Math.floor(secs / 60);
+    let s = secs % 60;
+    timerEl.textContent = pad(m) + ':' + pad(s);
 }
 
-// Start the focus session
-function startSession() {
-    // don't start if they didn't type anything
-    if (taskInput.value.trim() === "") {
-        alert("Enter a task first.");
+function startTicking() {
+    // make sure we don't stack intervals - got burned by this before
+    if (ticker) clearInterval(ticker);
+    ticker = setInterval(function() {
+        secs++;
+        showTime();
+    }, 1000);
+    running = true;
+}
+
+function beginSession() {
+    var task = taskInput.value.trim();
+    if (!task) {
+        // could do a shake animation here but this works for now
+        taskInput.focus();
         return;
     }
 
-    // swap UI
-    setupSection.classList.add('hidden');
-    focusSection.classList.remove('hidden');
-    taskDisplay.innerText = taskInput.value;
-    
-    // kick off the timer
-    isRunning = true;
-    timerInterval = setInterval(tick, 1000);
+    taskLabel.textContent = task;
+    setupDiv.classList.add('hidden');
+    focusDiv.classList.remove('hidden');
+
+    startTicking();
 }
 
-// Pause session (used when they tab out)
-function pauseSession() {
-    clearInterval(timerInterval);
-    isRunning = false;
-    
-    // show the resume button and warning
-    statusMessage.classList.remove('hidden');
+function pauseOnTabLeave() {
+    clearInterval(ticker);
+    running = false;
+    statusMsg.classList.remove('hidden');
     resumeBtn.classList.remove('hidden');
+    lapses++;
+    countEl.textContent = lapses;
 }
 
-// Resume after being distracted
 function resumeSession() {
-    statusMessage.classList.add('hidden');
+    statusMsg.classList.add('hidden');
     resumeBtn.classList.add('hidden');
-    
-    isRunning = true;
-    timerInterval = setInterval(tick, 1000);
+    startTicking();
 }
 
-// End the whole thing and reset
 function endSession() {
-    clearInterval(timerInterval);
-    
-    // reset state
-    seconds = 0;
-    interruptions = 0;
-    isRunning = false;
-    taskInput.value = "";
-    timerDisplay.innerText = "00:00";
-    interruptionDisplay.innerText = "0";
-    
-    // reset UI visibility
-    statusMessage.classList.add('hidden');
+    clearInterval(ticker);
+    ticker = null;
+
+    // reset everything back to zero
+    secs = 0;
+    lapses = 0;
+    running = false;
+
+    timerEl.textContent = '00:00';
+    countEl.textContent = '0';
+    taskInput.value = '';
+    taskLabel.textContent = '...';
+
+    statusMsg.classList.add('hidden');
     resumeBtn.classList.add('hidden');
-    focusSection.classList.add('hidden');
-    setupSection.classList.remove('hidden');
+    focusDiv.classList.add('hidden');
+    setupDiv.classList.remove('hidden');
+
+    // slight delay so the reset doesn't feel instant
+    setTimeout(() => taskInput.focus(), 50);
 }
 
-
-// --- Events ---
-
-startBtn.addEventListener('click', startSession);
-resumeBtn.addEventListener('click', resumeSession);
+startBtn.addEventListener('click', beginSession);
 endBtn.addEventListener('click', endSession);
+resumeBtn.addEventListener('click', resumeSession);
 
-// allow hitting Enter to start
-taskInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') startSession();
+taskInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') beginSession();
 });
 
-// The snitch: check if they leave the tab
-document.addEventListener('visibilitychange', () => {
-    // only punish them if the timer is actively running
-    if (isRunning && document.visibilityState === 'hidden') {
-        interruptions++;
-        interruptionDisplay.innerText = interruptions;
-        pauseSession();
+// catches tab switches / window minimise
+document.addEventListener('visibilitychange', function() {
+    if (running && document.visibilityState === 'hidden') {
+        pauseOnTabLeave();
     }
 });
+
+// TODO: maybe save best session to localStorage at some point
