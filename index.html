@@ -10,30 +10,73 @@
 
 <main class="container">
 
-    <div id="setup-section">
-        <!-- tried adding a logo here earlier but it looked bad -->
-        <h1 class="app-title">unplug.</h1>
-        <input type="text" id="task-input" placeholder="what are you working on?" autocomplete="off" maxlength="60">
-        <button id="start-btn">lock in</button>
+  <div id="setup-section">
+    <h1 class="app-title">unplug.</h1>
+    <input type="text" id="task-input" placeholder="what are you working on?" autocomplete="off" maxlength="60">
+
+    <div class="mode-row">
+      <button class="mode-btn active" data-mins="0">free</button>
+      <button class="mode-btn" data-mins="10">10m</button>
+      <button class="mode-btn" data-mins="25">25m</button>
+      <button class="mode-btn" data-mins="50">50m</button>
     </div>
 
-    <div id="focus-section" class="hidden">
-        <p id="current-task"><span id="task-label">...</span></p>
+    <button id="start-btn">lock in</button>
 
-        <div id="timer-display">00:00</div>
-
-        <!-- maybe add a progress bar here later? idk -->
-        <div class="stats-row">
-            <span>interruptions:</span>
-            <span id="interruption-count">0</span>
-        </div>
-
-        <p id="status-message" class="hidden">hey. you left. timer stopped.</p>
-        <div class="btn-group">
-          <button id="resume-btn" class="hidden">resume</button>
-          <button id="end-btn">end</button>
-        </div>
+    <div id="history-section" class="hidden">
+      <p class="history-label">recent sessions</p>
+      <ul id="history-list"></ul>
     </div>
+  </div>
+
+  <div id="focus-section" class="hidden">
+    <p id="current-task"><span id="task-label">...</span></p>
+    <p id="mode-label"></p>
+
+    <div id="timer-display">00:00</div>
+
+    <div id="progress-wrap" class="hidden">
+      <div id="progress-bar"></div>
+    </div>
+
+    <div class="stats-row">
+      <span>interruptions: <b id="interruption-count">0</b></span>
+      <span class="divider">·</span>
+      <span>lost: <b id="time-lost">0s</b></span>
+    </div>
+
+    <p id="status-message" class="hidden">hey. you left. timer stopped.</p>
+
+    <div class="btn-group">
+      <button id="resume-btn" class="hidden">resume</button>
+      <button id="end-btn">end session</button>
+    </div>
+  </div>
+
+  <div id="summary-section" class="hidden">
+    <p class="summary-heading">session complete</p>
+    <p id="summary-task-name"></p>
+    <div id="summary-time"></div>
+    <div class="summary-grid">
+      <div class="summary-cell">
+        <span class="summary-val" id="summary-interruptions">0</span>
+        <span class="summary-key">interruptions</span>
+      </div>
+      <div class="summary-cell">
+        <span class="summary-val" id="summary-lost">0s</span>
+        <span class="summary-key">time lost</span>
+      </div>
+      <div class="summary-cell">
+        <span class="summary-val" id="summary-score">—</span>
+        <span class="summary-key">focus score</span>
+      </div>
+    </div>
+    <p id="summary-verdict"></p>
+    <div class="btn-group">
+      <button id="again-btn">again</button>
+      <button id="new-task-btn">new task</button>
+    </div>
+  </div>
 
 </main>
 

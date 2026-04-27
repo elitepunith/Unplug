@@ -1,4 +1,4 @@
-/* unplug - focus timer  */
+/* unplug - focus timer */
 /* started this around 11pm, apologies for some of the mess below */
 
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
@@ -7,7 +7,9 @@
     --bg: #0f0f0f;
     --fg: #dedede;
     --dim: #555;
+    --dimmer: #333;
     --red: #e05252;
+    --green: #52c07a;
     /* tried #ff5252 but it felt too bright */
 }
 
@@ -54,15 +56,64 @@ input[type="text"] {
     font-size: 1rem;
     text-align: center;
     outline: none;
-    margin-bottom: 28px;
+    margin-bottom: 24px;
     transition: border-color 0.15s;
 }
 
-input::placeholder { color: var(--dim); }
+input::placeholder {
+    color: var(--dim);
+}
 
 input[type="text"]:focus {
     border-bottom-color: var(--fg);
 }
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%       { transform: translateX(-6px); }
+    40%       { transform: translateX(6px); }
+    60%       { transform: translateX(-4px); }
+    80%       { transform: translateX(4px); }
+}
+
+input.shake {
+    animation: shake 0.35s ease;
+    border-bottom-color: var(--red);
+}
+
+/* mode selector */
+
+.mode-row {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 24px;
+}
+
+.mode-btn {
+    background: none;
+    color: var(--dim);
+    border: 1px solid var(--dimmer);
+    padding: 6px 14px;
+    font-family: inherit;
+    font-size: 0.75rem;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.1s;
+}
+
+.mode-btn:hover {
+    border-color: var(--dim);
+    color: var(--fg);
+}
+
+.mode-btn.active {
+    color: var(--fg);
+    border-color: var(--dim);
+    background: var(--dimmer);
+}
+
+/* buttons */
 
 button {
     background: none;
@@ -80,7 +131,6 @@ button {
 button:hover {
     background: var(--fg);
     color: var(--bg);
-    /* tried box-shadow here, looked bad */
 }
 
 #start-btn {
@@ -95,12 +145,19 @@ button:hover {
     color: var(--bg);
 }
 
+/* focus screen */
+
 #timer-display {
     font-size: 5.5rem;
     font-weight: 700;
     letter-spacing: -4px;
     margin: 20px 0 16px;
     line-height: 1;
+    transition: color 0.3s;
+}
+
+#timer-display.done {
+    color: var(--green);
 }
 
 #current-task {
@@ -108,8 +165,32 @@ button:hover {
     color: var(--dim);
     letter-spacing: 2px;
     text-transform: uppercase;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     min-height: 1.2em;
+}
+
+#mode-label {
+    font-size: 0.7rem;
+    color: var(--dimmer);
+    letter-spacing: 1px;
+    margin: 0 0 10px 0;
+}
+
+/* progress bar */
+
+#progress-wrap {
+    width: 100%;
+    height: 2px;
+    background: var(--dimmer);
+    margin: 12px 0 20px;
+    position: relative;
+}
+
+#progress-bar {
+    height: 100%;
+    background: var(--fg);
+    width: 0%;
+    transition: width 1s linear;
 }
 
 .stats-row {
@@ -118,7 +199,17 @@ button:hover {
     margin-bottom: 28px;
     display: flex;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
+    align-items: center;
+}
+
+.stats-row b {
+    color: var(--fg);
+    font-weight: 400;
+}
+
+.divider {
+    color: var(--dimmer);
 }
 
 #status-message {
@@ -135,4 +226,118 @@ button:hover {
     gap: 6px;
 }
 
-.hidden { display: none !important; }
+/* summary screen */
+
+.summary-heading {
+    font-size: 0.7rem;
+    letter-spacing: 3px;
+    color: var(--dim);
+    text-transform: uppercase;
+    margin: 0 0 20px;
+}
+
+#summary-task-name {
+    font-size: 0.85rem;
+    color: var(--dim);
+    margin: 0 0 4px;
+    letter-spacing: 1px;
+}
+
+#summary-time {
+    font-size: 4.5rem;
+    font-weight: 700;
+    letter-spacing: -3px;
+    margin: 10px 0 24px;
+    line-height: 1;
+}
+
+.summary-grid {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-bottom: 24px;
+}
+
+.summary-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.summary-val {
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.summary-key {
+    font-size: 0.65rem;
+    color: var(--dim);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+#summary-verdict {
+    font-size: 0.8rem;
+    color: var(--dim);
+    margin: 0 0 28px;
+    letter-spacing: 0.5px;
+    font-style: italic;
+}
+
+/* session history */
+
+.history-label {
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    color: var(--dimmer);
+    text-transform: uppercase;
+    margin: 40px 0 12px;
+}
+
+#history-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-top: 1px solid var(--dimmer);
+}
+
+#history-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--dimmer);
+    gap: 12px;
+}
+
+.h-task {
+    font-size: 0.8rem;
+    color: var(--fg);
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 220px;
+}
+
+.h-meta {
+    font-size: 0.7rem;
+    color: var(--dim);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* fade in for sections */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+#focus-section, #summary-section {
+    animation: fadeUp 0.25s ease;
+}
+
+.hidden {
+    display: none !important;
+}
